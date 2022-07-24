@@ -86,13 +86,17 @@
 				arg message;
 				{
 					~vecIn1RMS.removeAt(0);
-					~vecIn1RMS = ~vecIn1RMS.add(message[3]);
+					~vecIn1RMS = ~vecIn1RMS.add(message[4].ampdb.linlin(-120, 0, 0, 1));
 					~in1MultiSliderView.value = ~vecIn1RMS;
+
+					~in1LevelIndicator.peakLevel = message[3].ampdb.linlin(-120, 0, 0, 1);
+					~in1LevelIndicator.value = message[4].ampdb.linlin(-120, 0, 0, 1);
+
 				}.fork(AppClock);
 
 				{
 					(~rmsTriggerActive == true).if({
-						~funcRMSTriggerElectronics.value(0, message[3]);
+						~funcRMSTriggerElectronics.value(0, message[4].ampdb.linlin(-120, 0, 0, 1));
 					});
 				}.fork(SystemClock);
 
@@ -104,13 +108,16 @@
 				arg message;
 				{
 					~vecIn2RMS.removeAt(0);
-					~vecIn2RMS = ~vecIn2RMS.add(message[3]);
+					~vecIn2RMS = ~vecIn2RMS.add(message[4].ampdb.linlin(-120, 0, 0, 1));
 					~in2MultiSliderView.value = ~vecIn2RMS;
+
+					~in2LevelIndicator.peakLevel = message[3].ampdb.linlin(-120, 0, 0, 1);
+					~in2LevelIndicator.value = message[4].ampdb.linlin(-120, 0, 0, 1);
 				}.fork(AppClock);
 
 				{
 					(~rmsTriggerActive == true).if({
-						~funcRMSTriggerElectronics.value(1, message[3]);
+						~funcRMSTriggerElectronics.value(1, message[4].ampdb.linlin(-120, 0, 0, 1));
 					});
 				}.fork(SystemClock);
 			}, '/in2PeakRMS', s.addr);
@@ -120,7 +127,12 @@
 			OSCFunc({
 				arg message;
 				{
-
+					var numChannels=2;
+					numChannels.do{
+						arg index;
+						~speakersOutLevelIndicators[index].peakLevel = message[3+(index*2)].ampdb.linlin(-120, 0, 0, 1);
+						~speakersOutLevelIndicators[index].value = message[3+(index*2)+1].ampdb.linlin(-120, 0, 0, 1);
+					};
 				}.fork(AppClock);
 			}, '/outDecoderPeakRMS', s.addr);
 		);
@@ -129,9 +141,28 @@
 			OSCFunc({
 				arg message;
 				{
-
+					var numChannels=4;
+					numChannels.do{
+						arg index;
+						~reverbLevelIndicators[index].peakLevel = message[3+(index*2)].ampdb.linlin(-120, 0, 0, 1);
+						~reverbLevelIndicators[index].value = message[3+(index*2)+1].ampdb.linlin(-120, 0, 0, 1);
+					};
 				}.fork(AppClock);
 			}, '/outReverbPeakRMS', s.addr);
+		);
+
+		~vecOSCFuncsVu = ~vecOSCFuncsVu.add(
+			OSCFunc({
+				arg message;
+				{
+					var numChannels=4;
+					numChannels.do{
+						arg index;
+						~electronicsLevelIndicators[index].peakLevel = message[3+(index*2)].ampdb.linlin(-120, 0, 0, 1);
+						~electronicsLevelIndicators[index].value = message[3+(index*2)+1].ampdb.linlin(-120, 0, 0, 1);
+					};
+				}.fork(AppClock);
+			}, '/outElectronicsPeakRMS', s.addr);
 		);
 	};
 

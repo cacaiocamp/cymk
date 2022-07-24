@@ -25,10 +25,11 @@
 ~vecMIDIKnobsBuses = Array.fill(9, {0});
 // --- Other configs
 ~record = false;
-~withMidiController = true;
+~withMidiController = false;
 
 // --- Dictionaries
 ~ambiObjTypes = Dictionary.newFrom(List[\general, 0, \instRoute, 1]);
+~rmsTriggerTypes = Dictionary.newFrom(List[\bartok, 0, \bridge, 1]);
 
 // --- DEFAULT GUI values
 ~avaibleBounds = Window.screenBounds;  //- Rect containing the maximum width and height for the Views
@@ -44,6 +45,8 @@
 ~in1Color = Color(255/255, 200/255, 200/255, 0.6);
 ~in2Color = Color(200/255, 255/255, 180/255, 0.6);
 ~numPizzFiles = 12;
+~numBartokFiles = 14;
+~numBridgeFiles = 9;
 
 // --- GUI vecs
 ~vecIn1RMS = Array.fill(~fps * ~inLevelSlidersDur, {1});
@@ -55,6 +58,7 @@
 ~vecAmbiObjects = [];
 ~vecAmbiObjectsRoutes = [];
 ~vecPizzSoundFilesBuffers = [];
+~vecBartokSoundFilesBuffers = [];
 ~vecBridgeSoundFilesBuffers = [];
 ~currentEvent = -1;
 ~pedalCooldown = 0;
@@ -69,14 +73,20 @@
 ~minRandomPizzAmp = 0.35; ~maxRandomPizzAmp = 0.5;
 
 //rms trigger initialization
-~rmsTriggerActive = true;
+~rmsTriggerActive = false;
 ~triggerOffFactor = -0.05;
-~cooldownTriggerDur = 2.0;
+~cooldownTriggerDur = 0;
 ~inputTriggered = Array.fill(2, {false});
 ~inputTriggerCooldown = Array.fill(2, {false});
+~curRMSTrigger = ~rmsTriggerTypes[\bartok];
 
 //bounce initialization
 ~bounceAmplitudeTresh = 0.1;
+~numBouncesActive = 0;
+
+//bridge initialization
+~vecKillTasks = [];
+~numBridgesActive = 0;
 
 // --- Server config
 s = Server.local;
@@ -110,6 +120,14 @@ s.boot;
 
 				if(soundFileCount < ~numPizzFiles, {
 					~vecPizzSoundFilesBuffers = ~vecPizzSoundFilesBuffers.add(buffer);
+				}, {
+					if(soundFileCount < (~numPizzFiles + ~numBartokFiles), {
+						~vecBartokSoundFilesBuffers = ~vecBartokSoundFilesBuffers.add(buffer);
+					}, {
+						if(soundFileCount < (~numPizzFiles + ~numBartokFiles + ~numBridgeFiles), {
+							~vecBridgeSoundFilesBuffers = ~vecBridgeSoundFilesBuffers.add(buffer);
+						});
+					});
 				});
 
 				soundFileCount = soundFileCount + 1;

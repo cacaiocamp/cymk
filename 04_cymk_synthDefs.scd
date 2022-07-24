@@ -12,7 +12,7 @@
 			outsig = decode * amp * fader;
 			outsig = Limiter.ar(outsig);
 
-			SendPeakRMS.ar(outsig, cmdName:'/outputs');
+			SendPeakRMS.ar(outsig, cmdName:'/outDecoderPeakRMS');
 			Out.ar(outbus, outsig)
 		}).add;
 
@@ -69,54 +69,6 @@
 			bfSignal = FoaTransform.ar(bfSignal, 'rotate', aziEnv);
 
 			Out.ar(outbus, bfSignal);
-		}).add;
-
-		SynthDef(\play1ChBuff_nobf, {
-			arg buffNum, secInit = 0, secEnd, outbus, durPercent = 1, amp = 1, doneAction = 14;
-			var pBuff, signal,
-			    sampleInit, sampleEnd, buffSampleRate, dur, bufPointer,
-			    ampControl, ampEnv
-			;
-
-			buffSampleRate = BufSampleRate.ir(buffNum); //sampleRate do buff
-			dur = abs(secEnd - secInit); //duracao em segundos entre secInit e secEnd
-
-			sampleInit = secInit * buffSampleRate;//ponto inicial em samples
-			sampleEnd = secEnd * buffSampleRate;//ponto final em samples
-
-			//ponteiro que percorre os pontos de inicio e fim do arquivo, direcionando a leitura da UGen BufRd
-			bufPointer = Line.ar(sampleInit, sampleEnd, dur * durPercent, doneAction: 0);
-			pBuff = BufRd.ar(1, buffNum, bufPointer, 0);
-
-			ampControl = Control.names([\ampEnv]).kr(Env.newClear(50).asArray);
-			ampEnv = EnvGen.kr(ampControl, doneAction: doneAction) * amp;
-
-			signal = pBuff * ampEnv;
-
-			Out.ar(outbus, signal);
-		}).add;
-
-		SynthDef(\bandpass1ch_nobf, {
-			arg inbus, centerFreq, bandwidth, outbus;
-			var insig, bandpass;
-
-			insig = In.ar(inbus, 1);
-			bandpass = BPF.ar(insig, centerFreq, bandwidth/centerFreq);
-
-			Out.ar(outbus, bandpass);
-		}).add;
-
-		SynthDef(\reverb1ch_nobf, {
-			arg inbus, room = 0.5, damp = 0.5, outbus;
-			var insig, mixControl, mixEnv, reverbSig;
-
-			insig = In.ar(inbus, 1);
-
-			mixControl = Control.names([\mixEnv]).kr(Env.newClear(50).asArray);
-			mixEnv = EnvGen.kr(mixControl, doneAction:0);
-			reverbSig = FreeVerb.ar(insig, mixEnv, room, damp);
-
-			Out.ar(outbus, reverbSig);
 		}).add;
 
 		SynthDef(\in1ToBf, {
@@ -179,17 +131,26 @@
 
 		SynthDef(\electronicsBFRoute, {
 			arg inbus, outbus, faderBus, amp=1, gate = 1, done =  2;
-			var bfsig, outsig, faderIn, ampEnv, ampControl;
+			var bfSignal, outsig, faderIn, ampEnv, ampControl, aziControl, rhoControl, aziEnv, rhoEnv;
 
-			bfsig = In.ar(inbus,4);
+			bfSignal = In.ar(inbus,4);
 			faderIn = In.kr(faderBus, 1).lincurve(0,1,-120,6,-2.695).dbamp;
 
-			ampControl = Control.names(\ampEnv).kr(Env.newClear(50).asArray);
+			ampControl = Control.names(\ampEnvelope).kr(Env.newClear(50).asArray);
 			ampEnv = EnvGen.kr(ampControl, gate, doneAction: done);
 
-			bfsig = bfsig * faderIn * ampEnv;
-			outsig = bfsig * amp;
+			aziControl = Control.names(\aziEnvelope).kr(Env.newClear(50).asArray);
+			rhoControl = Control.names(\rhoEnvelope).kr(Env.newClear(50).asArray);
+			aziEnv = EnvGen.kr(aziControl);
+			rhoEnv = EnvGen.kr(rhoControl);
 
+			bfSignal = FoaTransform.ar(bfSignal, 'directO', (rhoEnv) * (pi/2));
+			bfSignal = FoaTransform.ar(bfSignal, 'rotate', aziEnv);
+
+			bfSignal = bfSignal * faderIn * ampEnv;
+			outsig = bfSignal * amp;
+
+			SendPeakRMS.ar(outsig, cmdName:'/outElectronicsPeakRMS');
 			Out.ar(outbus, outsig)
 		}).add;
 
@@ -206,6 +167,8 @@
 
 			bf = BFGVerb.ar(w,x,y,z,diffuse,iroom,rtime*10,damp,inbw,dry,early,tail,imaxroom);
 			outsig = bf * amp * envgen * fader;
+
+			SendPeakRMS.ar(outsig, cmdName:'/outReverbPeakRMS');
 			Out.ar(outbus, outsig);
 		}).add;
 
@@ -214,6 +177,17 @@
 			var insig,outsig;
 			insig = In.ar(inbus,4);
 			outsig = insig*amp;
+			Out.ar(outbus,outsig)
+		}).add;
+
+		SynthDef(\hardRoute4chMicIn, {
+			arg inbus, outbus, faderBus, amp=1;
+			var insig,outsig, fader;
+
+			insig = In.ar(inbus,4);
+			fader = In.kr(faderBus, 1);
+			outsig = insig*amp*fader;
+
 			Out.ar(outbus,outsig)
 		}).add;
 	)

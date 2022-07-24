@@ -212,5 +212,67 @@ AppClock.sched(0,{
 	~in2LevelSlider = Slider(~compsInLevels, Rect(widthOffset, heightOffset, ~compsInLevels.bounds.width/15, (~compsInLevels.bounds.height/2) - (margin)));
 	~in2LevelSlider.thumbSize = 10;
 	~in2LevelSlider.knobColor = Color(50/255, 180/255, 50/255, 1);
+
+	// ----- LEVEL INDICATORS
+	widthOffset = ~compsInLevels.bounds.width + (2*margin);
+	~in1LevelIndicator = LevelIndicator(~compsControl, Rect(widthOffset + (~compsInLevels.bounds.width/15), 3*margin, ~compsInLevels.bounds.width/15, (~compsInLevels.bounds.height/2) - (4*margin)))
+	.numTicks_(11)
+	.drawsPeak_(true)
+	.warning_(0.75)
+	.critical_(0.8);
+
+	heightOffset = ~compsInLevels.bounds.height/2;
+	~in2LevelIndicator = LevelIndicator(~compsControl, Rect(widthOffset + (~compsInLevels.bounds.width/15), heightOffset + (3*margin), ~compsInLevels.bounds.width/15, (~compsInLevels.bounds.height/2) - (4*margin)))
+	.numTicks_(11)
+	.drawsPeak_(true)
+	.warning_(0.75)
+	.critical_(0.8);
+
+	widthOffset = ~compsControl.bounds.width/1.75;
+	heightOffset = ~compsControl.bounds.height/4;
+	~electronicsLevelIndicators = Array.fill(4, {
+		arg index;
+		var plusOffset;
+
+		plusOffset = index * ~compsInLevels.bounds.width/15;
+		LevelIndicator(~compsControl, Rect(widthOffset+plusOffset, heightOffset, ~compsInLevels.bounds.width/15, ~compsControl.bounds.height/2))
+		.numTicks_(11)
+		.drawsPeak_(true)
+		.warning_(0.75)
+		.critical_(0.8);
+	});
+
+	widthOffset = widthOffset + (2*margin) + (5*(~compsInLevels.bounds.width/15));
+	~reverbLevelIndicators = Array.fill(4, {
+		arg index;
+		var plusOffset;
+
+		plusOffset = index * ~compsInLevels.bounds.width/15;
+		LevelIndicator(~compsControl, Rect(widthOffset+plusOffset, heightOffset, ~compsInLevels.bounds.width/15, ~compsControl.bounds.height/2))
+		.numTicks_(11)
+		.drawsPeak_(true)
+		.warning_(0.75)
+		.critical_(0.8);
+	});
+
+	widthOffset = ~compsControl.bounds.width - (4*margin) - (3*(~compsInLevels.bounds.width/15));
+	~speakersOutLevelIndicators = Array.fill(2, {
+		arg index;
+		var plusOffset;
+
+		plusOffset = index * ~compsInLevels.bounds.width/15;
+		LevelIndicator(~compsControl, Rect(widthOffset+plusOffset, heightOffset, ~compsInLevels.bounds.width/15, ~compsControl.bounds.height/2))
+		.numTicks_(11)
+		.drawsPeak_(true)
+		.warning_(0.75)
+		.critical_(0.8);
+	});
+
+	/*widthOffset = ~compsControl;
+	heightOffset = (margin * 5) + ~ambisonicsCircleDiameter + (2*margin);
+
+	// ----- COMPS EVENTS
+	~compsControl = CompositeView(~guiGeneralWin, Rect(widthOffset, heightOffset, 2.75 * (~ambisonicsCircleDiameter + (2*margin)), ~compsBgHeight - (~ambisonicsCircleDiameter + (8*margin))));
+	~compsControl.background_(Color(210/255, 120/255, 70/255, 0.55));*/
 });
 )

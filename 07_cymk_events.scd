@@ -27,13 +27,13 @@
 				\faderBus,  ~vecMIDIFadersBuses[7], //
 				\amp, 3.dbamp,
 				\iroom, 40, //NAO MODULAR!      //usar knobs? * 100
-			//	\diffuse, ~bpf2000kBusArr[0][10].asMap, //usar knobs? 0-1
+				//\diffuse, ~vecMIDIKnobsBuses[3], //usar knobs? 0-1
 			//	\rtime, ~bpf2000kBusArr[0][11].asMap ,// NAO MODULAR! ~bpf2000kBusArr[0][11],//~bpf2000kBusArr[0][11],      //usar knobs? * 10
-			//	\damp, ~bpf2000kBusArr[0][12].asMap ,    //0 damps the reverb signal completely, 1 not at all.
-				//\inbw, ~bpf2000kBusArr[0][13].asMap ,//~bpf2000kBusArr[0][13],     //0 damps the reverb signal completely, 1 not at all. (in)
+				//\damp, ~vecMIDIKnobsBuses[4],    //0 damps the reverb signal completely, 1 not at all.
+				//\inbw, ~vecMIDIKnobsBuses[5] ,//~bpf2000kBusArr[0][13],     //0 damps the reverb signal completely, 1 not at all. (in)
 				\dry, 0,        //usar knobs?
-				//\early, ~bpf2000kBusArr[0][14].asMap,    //usar knobs?
-				//\tail, ~bpf2000kBusArr[0][15].asMap,     //usar knobs?
+				//\early, ~vecMIDIKnobsBuses[6],    //usar knobs?
+				//\tail, ~vecMIDIKnobsBuses[7],     //usar knobs?
 				\imaxroom, 300,
 				\gate,1,
 				\doneAction,2,
@@ -43,16 +43,18 @@
 
 			// Ambisonics routing for decoding and reverb
 			//1.liveRoute
-			~synth_hardRoute4ch_liveRoute_toDecode = Synth(\hardRoute4ch, [
+			~synth_hardRoute4ch_liveRoute_toDecode = Synth(\hardRoute4chMicIn, [
 				\inbus, ~busA_BF_liveRoute,
 				\outbus, ~busA_BF_toDecode,
-				\amp, 1
+				\amp, 1,
+				\faderBus, ~vecMIDIFadersBuses[4]
 			], target: ~group_liveRoute, addAction:\addAfter);
 
-			~synth_hardRoute4ch_liveRoute_reverb = Synth(\hardRoute4ch, [
+			~synth_hardRoute4ch_liveRoute_reverb = Synth(\hardRoute4chMicIn, [
 				\inbus, ~busA_BF_liveRoute,
 				\outbus, ~busA_BF_reverb,
-				\amp, 1
+				\amp, 1,
+				\faderBus, ~vecMIDIFadersBuses[4]
 			], target: ~group_liveRoute, addAction:\addAfter);
 
 			".. liveRoute -> toDecode / reverb: ok".postln;
@@ -187,7 +189,7 @@
 		{
 			"--> event 1 started".postln();
 
-			~minTimeBetweenPizz = 1.25; ~maxTimeBetweenPizz = 3.75;
+			~minTimeBetweenPizz = 1.5; ~maxTimeBetweenPizz = 4.1;
 			~minRandomPizzAzi = -pi; ~maxRandomPizzAzi = pi;
 			~minRandomPizzVelocityFactor = 0.975; ~maxRandomPizzVelocityFactor = 1.025;
 			~minRandomPizzFreq = 250.0; ~maxRandomPizzFreq = 2500.0;
@@ -475,10 +477,26 @@
 				aziKnobIndex: 1,
 				timeToDeath: nil
 			);
+
+			~curRMSTrigger = ~rmsTriggerTypes[\bartok];
+			~rmsTriggerActive = true;
 		}.fork();
 	},
 	{ // event 8
 		//parando de reagir aos quiques devagar (14 segundos)
+		{
+			"--> event 8 started".postln();
+
+			~taskIncreaseCooldown = Task({
+				var abv = 0;
+				inf.do({
+					~cooldownTriggerDur = ~cooldownTriggerDur + (rrand(0.02, 0.05));
+					(1.0/10).wait;
+				});
+			}, SystemClock);
+
+			~taskIncreaseCooldown.play;
+		}.fork();
 	},
 	{ // event 9
 		//fecha routes lentamente; forca parada de quiques
@@ -489,6 +507,9 @@
 			~mic2InSynth.release();
 
 			~funcRemoveAllRoutesAmbiObj.value(6);
+
+			~taskIncreaseCooldown.stop;
+			~rmsTriggerActive = false;
 		}.fork;
 	},
 	{ // event 10
@@ -498,7 +519,7 @@
 
 			~mic1InSynth.release(0.1);
 			~mic2InSynth.release(0.1);
-		}
+		}.fork();
 	},
 	{ // event 11
 		//abre routes rápido (1 segundo?) - triga ruído de cavelete com próximo ataque (contínuo)
@@ -551,16 +572,42 @@
 				aziKnobIndex: 1,
 				timeToDeath: nil
 			);
+
+			~curRMSTrigger = ~rmsTriggerTypes[\bridge];
+			~rmsTriggerActive = true;
+			~cooldownTriggerDur = 0;
 		}.fork();
 	},
 	{ // event 12
 		//para ruído de cavalete
+		{
+			"--> event 12 started".postln();
+
+			~vecKillTasks.do({
+				arg killTask;
+
+				killTask.play;
+			});
+			~vecKillTasks = [];
+			~rmsTriggerActive = false;
+		}.fork;
 	},
 	{ // event 13
 		//bartoks aumentando número de nodes que ativam ruídos de cavalete randômicos
+		{
+			"--> event 13 started".postln();
+
+			~curRMSTrigger = ~rmsTriggerTypes[\bridge];
+			~rmsTriggerActive = true;
+			~cooldownTriggerDur = 1.5;
+		}.fork();
 	},
 	{ // event 14
 		//mater ruídos de cavelete, parar de trigar mais nodes
+		{
+			"--> event 14 started".postln();
+			~rmsTriggerActive = true;
+		}.fork();
 	},
 	{//last event  - 15
 		//deixar desinência dos ruídos, descrescendo; fechar routes lentamente
@@ -569,6 +616,12 @@
 
 			~mic1InSynth.release();
 			~mic2InSynth.release();
+
+			~vecKillTasks.do({
+				arg killTask;
+
+				killTask.play;
+			});
 
 			~funcRemoveAllRoutesAmbiObj.value(10);
 
