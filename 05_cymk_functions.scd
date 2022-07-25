@@ -38,10 +38,12 @@
 					},
 					4, {
 						{
+							~liveRoutesOutLevelSlider.valueAction_(~vecMIDIFadersValues[faderIndexing])
 						}.fork(AppClock)
 					},
 					5, {
 						{
+							~electronicsOutLevelSlider.valueAction_(~vecMIDIFadersValues[faderIndexing])
 						}.fork(AppClock)
 					},
 					6, {
@@ -50,10 +52,12 @@
 					},
 					7, {
 						{
+							~reverbOutLevelSlider.valueAction_(~vecMIDIFadersValues[faderIndexing])
 						}.fork(AppClock)
 					},
 					8, {
 						{
+							~speakersOutLevelSlider.valueAction_(~vecMIDIFadersValues[faderIndexing])
 						}.fork(AppClock)
 					}
 				);
@@ -177,6 +181,12 @@
 
 			~vecEvents[~currentEvent].value();
 		});
+	};
+
+	~funcUpdateScoreWebView = {
+		arg systemNumber;
+
+		~scoreWebView.url_((Document.current.dir +/+ "score" +/+ ~scoreSystems[systemNumber-1]).standardizePath);
 	};
 }.fork(SystemClock);
 )

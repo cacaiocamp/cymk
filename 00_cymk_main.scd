@@ -25,7 +25,7 @@
 ~vecMIDIKnobsBuses = Array.fill(9, {0});
 // --- Other configs
 ~record = false;
-~withMidiController = false;
+~withMidiController = true;
 
 // --- Dictionaries
 ~ambiObjTypes = Dictionary.newFrom(List[\general, 0, \instRoute, 1]);
@@ -87,6 +87,15 @@
 //bridge initialization
 ~vecKillTasks = [];
 ~numBridgesActive = 0;
+
+//score initialization
+~scoreSystems = Array.fill(32, {
+	arg index;
+	var pngName;
+
+	pngName = "system" ++ (index + 1)++ ".png";
+});
+~currentSystemNumber = 1;
 
 // --- Server config
 s = Server.local;

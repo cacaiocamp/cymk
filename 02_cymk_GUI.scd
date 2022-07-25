@@ -7,6 +7,8 @@ AppClock.sched(0,{
 	    ambisonicsCircleDiameter = 0,
 	    ambisonicsCenterPoint = Point.new(),
 
+	    eventStaticText,
+
 	    widthOffset = 0,
 	    heightOffset = 0
 	;
@@ -79,8 +81,21 @@ AppClock.sched(0,{
 	~guiGeneralWin.view.keyDownAction = {
 		arg view, char, modifiers, unicode, keycode;
 
+		//keycode.postln;
+
 		(keycode == 32).if({
 			~funcPlayNextEvent.value();
+			~currentEventStaticText.string = (~currentEvent - 2);
+		}, {
+			if(keycode == 37, {
+				~currentSystemNumber = ~currentSystemNumber - 1;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}, {
+				if(keycode == 39, {
+					~currentSystemNumber = ~currentSystemNumber + 1;
+					~funcUpdateScoreWebView.value(~currentSystemNumber);
+				});
+			});
 		});
 	};
 
@@ -228,51 +243,96 @@ AppClock.sched(0,{
 	.warning_(0.75)
 	.critical_(0.8);
 
-	widthOffset = ~compsControl.bounds.width/1.75;
-	heightOffset = ~compsControl.bounds.height/4;
+	widthOffset = ~compsInLevels.bounds.width + (3*margin)  + (2*(~compsInLevels.bounds.width/15));
+	heightOffset = ~compsControl.bounds.height/4 - margin;
+	~liveRoutesOutLevelSlider = Slider(~compsControl, Rect(widthOffset, heightOffset, ~compsInLevels.bounds.width/15, (~compsControl.bounds.height/2) + (2*margin)));
+	~liveRoutesOutLevelSlider.thumbSize = 10;
+	~liveRoutesOutLevelSlider.knobColor = Color(50/255, 180/255, 50/255, 1);
+
+	widthOffset = (~compsControl.bounds.width/2);
+	~electronicsOutLevelSlider = Slider(~compsControl, Rect(widthOffset, heightOffset, ~compsInLevels.bounds.width/15, (~compsControl.bounds.height/2) + (2*margin)));
+	~electronicsOutLevelSlider.thumbSize = 10;
+	~electronicsOutLevelSlider.knobColor = Color(50/255, 180/255, 50/255, 1);
+
+	widthOffset = widthOffset + (2*margin) + (~compsInLevels.bounds.width/15);
 	~electronicsLevelIndicators = Array.fill(4, {
 		arg index;
 		var plusOffset;
 
 		plusOffset = index * ~compsInLevels.bounds.width/15;
-		LevelIndicator(~compsControl, Rect(widthOffset+plusOffset, heightOffset, ~compsInLevels.bounds.width/15, ~compsControl.bounds.height/2))
+		LevelIndicator(~compsControl, Rect(widthOffset+plusOffset, heightOffset + margin, ~compsInLevels.bounds.width/15, ~compsControl.bounds.height/2))
 		.numTicks_(11)
 		.drawsPeak_(true)
 		.warning_(0.75)
 		.critical_(0.8);
 	});
 
-	widthOffset = widthOffset + (2*margin) + (5*(~compsInLevels.bounds.width/15));
+	widthOffset = widthOffset + (2*margin) + (7*(~compsInLevels.bounds.width/15));
+	heightOffset = ~compsControl.bounds.height/4 - margin;
+	~reverbOutLevelSlider = Slider(~compsControl, Rect(widthOffset, heightOffset, ~compsInLevels.bounds.width/15, (~compsControl.bounds.height/2) + (2*margin)));
+	~reverbOutLevelSlider.thumbSize = 10;
+	~reverbOutLevelSlider.knobColor = Color(50/255, 180/255, 50/255, 1);
+
+	widthOffset = widthOffset + (2*margin) + (~compsInLevels.bounds.width/15);
 	~reverbLevelIndicators = Array.fill(4, {
 		arg index;
 		var plusOffset;
 
 		plusOffset = index * ~compsInLevels.bounds.width/15;
-		LevelIndicator(~compsControl, Rect(widthOffset+plusOffset, heightOffset, ~compsInLevels.bounds.width/15, ~compsControl.bounds.height/2))
+		LevelIndicator(~compsControl, Rect(widthOffset+plusOffset, heightOffset + margin, ~compsInLevels.bounds.width/15, ~compsControl.bounds.height/2))
 		.numTicks_(11)
 		.drawsPeak_(true)
 		.warning_(0.75)
 		.critical_(0.8);
 	});
 
-	widthOffset = ~compsControl.bounds.width - (4*margin) - (3*(~compsInLevels.bounds.width/15));
+
+	widthOffset = ~compsControl.bounds.width - (2*margin) - (4*(~compsInLevels.bounds.width/15));
+	heightOffset = ~compsControl.bounds.height/4 - margin;
+	~speakersOutLevelSlider = Slider(~compsControl, Rect(widthOffset, heightOffset, ~compsInLevels.bounds.width/15, (~compsControl.bounds.height/2) + (2*margin)));
+	~speakersOutLevelSlider.thumbSize = 10;
+	~speakersOutLevelSlider.knobColor = Color(50/255, 180/255, 50/255, 1);
+
+	widthOffset = widthOffset + (2*margin) + (~compsInLevels.bounds.width/15);
 	~speakersOutLevelIndicators = Array.fill(2, {
 		arg index;
 		var plusOffset;
 
 		plusOffset = index * ~compsInLevels.bounds.width/15;
-		LevelIndicator(~compsControl, Rect(widthOffset+plusOffset, heightOffset, ~compsInLevels.bounds.width/15, ~compsControl.bounds.height/2))
+		LevelIndicator(~compsControl, Rect(widthOffset+plusOffset, heightOffset + margin, ~compsInLevels.bounds.width/15, ~compsControl.bounds.height/2))
 		.numTicks_(11)
 		.drawsPeak_(true)
 		.warning_(0.75)
 		.critical_(0.8);
 	});
 
-	/*widthOffset = ~compsControl;
-	heightOffset = (margin * 5) + ~ambisonicsCircleDiameter + (2*margin);
+	widthOffset = ~compsControl.bounds.width + (5*margin);
+	heightOffset = ~userViewAmbisonics.bounds.height + (5*margin);
 
 	// ----- COMPS EVENTS
-	~compsControl = CompositeView(~guiGeneralWin, Rect(widthOffset, heightOffset, 2.75 * (~ambisonicsCircleDiameter + (2*margin)), ~compsBgHeight - (~ambisonicsCircleDiameter + (8*margin))));
-	~compsControl.background_(Color(210/255, 120/255, 70/255, 0.55));*/
+	~compsEvents = CompositeView(~guiGeneralWin, Rect(widthOffset, heightOffset, ~guiGeneralWinWidth - widthOffset - (2*margin), ~guiGeneralWinHeight - heightOffset - (3*margin)));
+	~compsEvents.background_(Color(140/255, 210/255, 90/255, 0.55));
+
+	eventStaticText = StaticText(~compsEvents, Rect(margin*10, margin*5, ~compsEvents.bounds.width/2, ~compsEvents.bounds.height/5))
+	.align_(\left)
+	.font_(Font("Avenir", 20))
+	.stringColor_(Color.fromHexString("222222"))
+	.string_("~currentEvent:");
+
+	~currentEventStaticText = StaticText(~compsEvents, Rect((~compsEvents.bounds.width/2) - (margin*2), margin*3, ~compsEvents.bounds.width/2, ~compsEvents.bounds.height/5))
+	.align_(\center)
+	.font_(Font("Avenir", 65))
+	.stringColor_(Color.fromHexString("FF3333"))
+	.string_((~currentEvent - 2).asString);
+
+	// ----- COMPS SCORE
+	widthOffset = ~userViewAmbisonics.bounds.width + (5*margin);
+	heightOffset = 3*margin;
+	~compsScore =  CompositeView(~guiGeneralWin, Rect(widthOffset, heightOffset, ~guiGeneralWinWidth - (widthOffset + (2*margin)), ~guiGeneralWinHeight - (heightOffset + margin + ~compsEvents.bounds.height + (4*margin))));
+	~compsScore.background_(Color(80/255, 110/255, 130/255, 0.55));
+
+	~scoreWebView = WebView.new(~compsScore, Rect(margin,margin,~compsScore.bounds.width - (margin*2),~compsScore.bounds.height- (margin*2))).url_((
+		Document.current.dir +/+ "score" +/+ ~scoreSystems[0]).standardizePath).canFocus_(false).acceptsMouse_(false);
+
 });
 )

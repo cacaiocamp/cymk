@@ -182,6 +182,11 @@
 				aziKnobIndex: 1,
 				timeToDeath: nil
 			);
+
+			{
+				~currentSystemNumber = 6;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork();
 	},
 	{ // event 1
@@ -197,6 +202,11 @@
 			~minRandomPizzAmp = 0.35; ~maxRandomPizzAmp = 0.5;
 
 			~event1_taskKill = ~funcRandomPizz.value();
+
+			{
+				~currentSystemNumber = 7;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork();
 	},
 	{ // event 2
@@ -240,6 +250,11 @@
 			{
 				~event22_taskKill = ~funcRandomPizz.value();
 			}.defer(3);
+
+			{
+				~currentSystemNumber = 8;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork();
 	},
 	{ // event 3
@@ -302,6 +317,11 @@
 
 				~event34_taskKill = ~funcRandomPizz.value();
 			}.defer(densityIncreaseDur);
+
+			{
+				~currentSystemNumber = 9;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork();
 
 	},
@@ -356,6 +376,11 @@
 			}, SystemClock);
 
 			~event4_taskPizzFiltering.play;
+
+			{
+				~currentSystemNumber = 11;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 
 		}.fork();
 	},
@@ -424,6 +449,11 @@
 			~event33_taskKill.play();
 			~event34_taskKill.play();
 			~event35_taskKill.play();
+
+			{
+				~currentSystemNumber = 12;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork();
 	},
 	{ // event 7
@@ -480,6 +510,11 @@
 
 			~curRMSTrigger = ~rmsTriggerTypes[\bartok];
 			~rmsTriggerActive = true;
+
+			{
+				~currentSystemNumber = 13;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork();
 	},
 	{ // event 8
@@ -496,6 +531,11 @@
 			}, SystemClock);
 
 			~taskIncreaseCooldown.play;
+
+			{
+				~currentSystemNumber = 16;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork();
 	},
 	{ // event 9
@@ -510,6 +550,11 @@
 
 			~taskIncreaseCooldown.stop;
 			~rmsTriggerActive = false;
+
+			{
+				~currentSystemNumber = 17;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork;
 	},
 	{ // event 10
@@ -519,6 +564,11 @@
 
 			~mic1InSynth.release(0.1);
 			~mic2InSynth.release(0.1);
+
+			{
+				~currentSystemNumber = 18;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork();
 	},
 	{ // event 11
@@ -576,6 +626,11 @@
 			~curRMSTrigger = ~rmsTriggerTypes[\bridge];
 			~rmsTriggerActive = true;
 			~cooldownTriggerDur = 0;
+
+			{
+				~currentSystemNumber = 21;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork();
 	},
 	{ // event 12
@@ -600,6 +655,11 @@
 			~curRMSTrigger = ~rmsTriggerTypes[\bridge];
 			~rmsTriggerActive = true;
 			~cooldownTriggerDur = 1.5;
+
+			{
+				~currentSystemNumber = 22;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork();
 	},
 	{ // event 14
@@ -607,6 +667,11 @@
 		{
 			"--> event 14 started".postln();
 			~rmsTriggerActive = true;
+
+			{
+				~currentSystemNumber = 25;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork();
 	},
 	{//last event  - 15
@@ -625,7 +690,12 @@
 
 			~funcRemoveAllRoutesAmbiObj.value(10);
 
-			("--> ELECTRONICS END <--|").defer(10);
+			{"--> ELECTRONICS END <--|".postln;}.defer(10);
+
+			{
+				~currentSystemNumber = 27;
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
 		}.fork;
 	}
 ];
