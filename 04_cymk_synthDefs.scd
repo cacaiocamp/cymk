@@ -16,6 +16,21 @@
 			Out.ar(outbus, outsig)
 		}).add;
 
+		SynthDef(\quadDecoder, {arg inbusBF, outbus, amp=1, faderBus;
+			var bfSignal, fader, decode, outsig;
+
+			bfSignal = In.ar(inbusBF,4);
+			fader = In.kr(faderBus,1).lincurve(0,1,-120,6,-2.695).dbamp;
+			bfSignal = FoaTransform.ar(bfSignal, 'nfc', ~speakersDistance);
+
+			decode = FoaDecode.ar(bfSignal, ~mainDecoder);
+			outsig = decode * amp * fader;
+			outsig = Limiter.ar(outsig);
+
+			SendPeakRMS.ar(outsig,cmdName:'/outDecoderPeakRMS');
+			Out.ar(outbus,outsig)
+		}).add;
+
 		SynthDef(\sinTest, {
 			arg freq = 200, freqImpulse = 15, outbus;
 			var aziControl, rhoControl, ampControl, aziEnv, rhoEnv, ampEnv, signal, bfSignal;

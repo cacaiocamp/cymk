@@ -118,13 +118,13 @@ AppClock.sched(0,{
 	);
 	~userViewAmbisonics.frameRate = ~fps;
 	~userViewAmbisonics.animate = true;
-	~userViewAmbisonics.background_(Color(150/255, 150/255, 210/255, 0.1));
+	~userViewAmbisonics.background_(Color(150/255, 150/255, 210/255, 0.2));
 
 	//--------------- Pen drawings
 	~userViewAmbisonics.drawFunc = {
 		//-- ambisonics circle
 		Pen.strokeColor = Color.new(210/255, 51/255, 0, 1);
-		Pen.fillColor = Color.new(50/255, 50/255, 90/255, 0.45);
+		Pen.fillColor = Color.new(50/255, 50/255, 90/255, 0.85);
 		Pen.addArc(ambisonicsCenterPoint, ~ambisonicsCircleDiameter/2, pi, pi);
 		Pen.addArc(ambisonicsCenterPoint, ~ambisonicsCircleDiameter/2, -pi, -pi);
 		Pen.width = 1;

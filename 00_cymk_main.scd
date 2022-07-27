@@ -1,19 +1,29 @@
 // --- Ambisonics config
 ~binauralOut = false;
 //~outSetup = \binauralOnly;
-~outSetup = \stereo;
+//~outSetup = \stereo;
+~outSetup = \quad;
 ~mainDecoder = nil;
-~speakerDistance = 1;
-~speakerBuses = [0,1];
+~speakersDistance = 8;
+~speakersOutBuses = [0, 1, 2, 3];
+~otherSpeakersBuses = [4,5,6,7];
+//~speakersOutBuses = [0, 1];
+//~otherSpeakersBuses = [];
+
+// --- Other configs
+~record = false;
+~withMidiController = true;
+~numOutBuses = (~speakersOutBuses.size) + (~otherSpeakersBuses.size) + (4*4);
 
 // --- In/Out devices config
 //~outDevice, "CABLE Input";
 ~outDevice = nil;
 ~nodeCounter = 0;
 //~outDevice = "AudioBox ASIO Driver";
-~violin_busNum = 18; //input0 after 18 outputs
-~cello_busNum = 19; //input1 after 18 outputs --- seek Server config
+~violin_busNum = ~numOutBuses; //input0 after outputs
+~cello_busNum = ~numOutBuses + 1; //input1 after utputs --- seek Server config
 
+//s.meter
 // -- MIDI controller config
 //MIDIClient.sources;
 ~midiSourceIndex = 0;
@@ -23,10 +33,7 @@
 ~vecMIDIButtonsValues = Array.fill(9, {0});
 ~vecMIDIFadersBuses = Array.fill(9, {0});
 ~vecMIDIKnobsBuses = Array.fill(9, {0});
-// --- Other configs
-~record = false;
-~withMidiController = true;
-
+//s.meter
 // --- Dictionaries
 ~ambiObjTypes = Dictionary.newFrom(List[\general, 0, \instRoute, 1]);
 ~rmsTriggerTypes = Dictionary.newFrom(List[\bartok, 0, \bridge, 1]);
@@ -99,11 +106,12 @@
 
 // --- Server config
 s = Server.local;
+
 o = s.options;
 o.device = ~outDevice;
 s.options.memSize = 16384;
 s.options.numInputBusChannels = 2;
-s.options.numOutputBusChannels = 18;
+s.options.numOutputBusChannels = ~numOutBuses;
 s.options.blockSize = 64;
 s.options.sampleRate = 48000;
 (
@@ -167,6 +175,10 @@ s.boot;
 				if(~outSetup == \stereo, {
 					~mainDecoder = FoaDecoderMatrix.newStereo;
 				});
+
+				if(~outSetup == \quad, {
+					~mainDecoder = FoaDecoderMatrix.newQuad(k: 'dual');
+				});
 			});
 			s.sync;
 
@@ -189,13 +201,14 @@ s.boot;
 			s.sync;
 
 			//audio buses
-			~busA_speakersOut = Bus.new('audio',~speakerBuses[0], 2); //0-1
+			~busA_speakersOut = Bus.new('audio',~speakersOutBuses[0], ~speakersOutBuses.size);
+			~busA_otherSpeakers = Bus.new('audio',~otherSpeakersBuses[0], ~otherSpeakersBuses.size);
 			s.sync;
 
-			~busA_BF_toDecode = Bus.new('audio', 2, 4, s); //2-5
-			~busA_BF_liveRoute = Bus.new('audio', 6, 4, s); //6-9
-			~busA_BF_electronics = Bus.new('audio', 10, 4, s); //10-13
-			~busA_BF_reverb = Bus.new('audio', 14, 4, s); //14-17
+			~busA_BF_toDecode = Bus.new('audio', (~speakersOutBuses.size) + (~otherSpeakersBuses.size), 4, s);
+			~busA_BF_liveRoute = Bus.new('audio', (~speakersOutBuses.size) + (~otherSpeakersBuses.size)+(1*4), 4, s);
+			~busA_BF_electronics = Bus.new('audio', (~speakersOutBuses.size) + (~otherSpeakersBuses.size)+(2*4), 4, s);
+			~busA_BF_reverb = Bus.new('audio', (~speakersOutBuses.size) + (~otherSpeakersBuses.size)+(3*4), 4, s);
 			s.sync;
 
 			~busA_violinIn = Bus.new('audio', ~violin_busNum, 1, s);
@@ -218,7 +231,7 @@ s.boot;
 				s.sync;
 			);
 
-			2.do({
+			/*2.do({
 				var aziEnv, rhoEnv, ampEnv,
 				    globalDur = 0,
 				    minAzi = rrand(-2pi, 2pi), maxAzi = minAzi + rrand(0, 2pi),
@@ -258,7 +271,7 @@ s.boot;
 					objType: 0,
 					timeToDeath: globalDur
 				);
-			});
+			});*/
 
 
 			if(~withMidiController == true, {
@@ -305,3 +318,5 @@ s.boot;
 	});
 }).play(SystemClock);
 )
+
+//s.meter

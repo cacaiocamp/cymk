@@ -19,6 +19,18 @@
 
 				"|--> decoder stereo/out added".postln;
 			});
+			(~outSetup == \quad).if({
+				~speakerDecoder = Synth(\quadDecoder,
+					[
+						\inbusBF, ~busA_BF_toDecode,
+						\outbus, ~busA_speakersOut,
+						\amp, 1,
+						\faderBus, ~vecMIDIFadersBuses[8]
+					], ~group_decoders
+				);
+
+				"|--> decoder stereo/out added".postln;
+			});
 
 			//reverb ambisonics
 			~synth_bfGVerb = Synth(\bfGVerb,[
@@ -336,6 +348,10 @@
 
 			"--> event 4 started".postln();
 
+			{
+				~funcUpdateScoreWebView.value(~currentSystemNumber);
+			}.fork(AppClock);
+
 			~event3_taskIncreasePizzDensity.stop;
 			~event3_taskIncreasePizzDensity.free;
 
@@ -379,7 +395,6 @@
 
 			{
 				~currentSystemNumber = 11;
-				~funcUpdateScoreWebView.value(~currentSystemNumber);
 			}.fork(AppClock);
 
 		}.fork();
