@@ -4,4 +4,4 @@ _cymk_ is a piece for violin, violocello and live-electronics, composed and deve
 
 The ideia of the piece is based on a question: what are the expectations for a piece composed for this instrumentation? I tried to reflect about this and use those expectations as a compositional component of the piece. For that, I used mainly _pizzicatos_, played on a restricted range of a major second and only samples, with some processing, on the electronics, triggered by different processes. The result is something that might not fully relate to the mixed pieces repertoir, trying to construct something that goes by another logic, even though using similar processes.
 
-The code displayed here is the one used on the premiere performace. You can access a binaural mix of the premiere here: 
+The code displayed here is the one used on the premiere performace. You can access a binaural mix of the premiere [here](https://on.soundcloud.com/vtnkZ)
